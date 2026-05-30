@@ -226,7 +226,7 @@
     background: var(--bg); z-index: 100;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    gap: 48px; transition: opacity 0.5s;
+    gap: 56px; transition: opacity 0.5s;
   }
 
   #start-screen h1 {
@@ -235,21 +235,51 @@
     color: var(--accent); line-height: 1;
   }
 
-  #start-screen p {
+  #start-screen .subtitle {
     font-size: 1.5rem; color: var(--dim);
     letter-spacing: 4px; text-align: center; line-height: 2.4;
   }
 
-  #start-btn {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2.6rem; letter-spacing: 10px;
-    padding: 28px 100px;
-    background: var(--accent); color: var(--bg);
-    border: none; border-radius: 8px; cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+  .level-buttons {
+    display: flex; gap: 60px; align-items: stretch;
   }
 
-  #start-btn:hover {
+  .level-btn {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.4rem; letter-spacing: 8px;
+    padding: 36px 80px;
+    border-radius: 12px; cursor: pointer;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 14px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 3px solid transparent;
+  }
+
+  .level-btn .btn-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 1rem; letter-spacing: 3px;
+    opacity: 0.75; text-transform: uppercase;
+  }
+
+  .level-btn.medium {
+    background: transparent;
+    color: var(--blue);
+    border-color: var(--blue);
+  }
+
+  .level-btn.medium:hover {
+    transform: scale(1.04);
+    box-shadow: 0 0 50px rgba(60,170,255,0.4);
+    background: rgba(60,170,255,0.08);
+  }
+
+  .level-btn.advanced {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+
+  .level-btn.advanced:hover {
     transform: scale(1.04);
     box-shadow: 0 0 50px rgba(232,255,60,0.5);
   }
@@ -292,14 +322,23 @@
 
   <div id="start-screen">
     <h1>HIIT VELO</h1>
-    <p>FORTGESCHRITTEN &nbsp;·&nbsp; 20 MINUTEN<br>2 BLÖCKE &nbsp;·&nbsp; TABATA + INTERVALL</p>
-    <button id="start-btn" onclick="startWorkout()">START</button>
+    <p class="subtitle">Wähle dein Level &nbsp;·&nbsp; 20 Minuten</p>
+    <div class="level-buttons">
+      <button class="level-btn medium" onclick="startWorkout('medium')">
+        MEDIUM
+        <span class="btn-sub">Aufwärmen · 6×30s Sprint / 30s Erholung<br>Pause · 4×40s Intervall · Ausfahren</span>
+      </button>
+      <button class="level-btn advanced" onclick="startWorkout('advanced')">
+        FORTGESCHRITTEN
+        <span class="btn-sub">Aufwärmen · 8×20s Tabata / 10s<br>Pause · 5×40s Intervall · Ausfahren</span>
+      </button>
+    </div>
   </div>
 
   <div id="finish-screen">
     <h1>DONE</h1>
     <p>20 MINUTEN ABGESCHLOSSEN – STARK!</p>
-    <button id="restart-btn" onclick="restartWorkout()">NOCHMAL</button>
+    <button id="restart-btn" onclick="showStartScreen()">NOCHMAL</button>
   </div>
 
   <div id="app">
@@ -373,7 +412,9 @@ function scaleToFit() {
 window.addEventListener('resize', scaleToFit);
 scaleToFit();
 
-function buildWorkout() {
+// ── WORKOUT DEFINITIONS ────────────────────────────────────────────────
+
+function buildAdvanced() {
   const s=[];
   s.push({name:'AUFWÄRMEN',type:'warm',duration:180,block:'VORBEREITUNG',blockDetail:'Lockeres Treten, Muskeln aktivieren',intensity:50,totalRounds:0,currentRound:0});
   for(let i=1;i<=8;i++){
@@ -389,11 +430,27 @@ function buildWorkout() {
   return s;
 }
 
-const WORKOUT=buildWorkout();
-const TOTAL=WORKOUT.reduce((a,x)=>a+x.duration,0);
+function buildMedium() {
+  const s=[];
+  s.push({name:'AUFWÄRMEN',type:'warm',duration:180,block:'VORBEREITUNG',blockDetail:'Lockeres Treten, gleichmässig einfahren',intensity:50,totalRounds:0,currentRound:0});
+  for(let i=1;i<=6;i++){
+    s.push({name:'SPRINT',type:'sprint',duration:30,block:'BLOCK 1 – SPRINT',blockDetail:'6 Runden · 30 Sek. Sprint / 30 Sek. Erholung\nHohes Tempo, guter Widerstand',intensity:85,totalRounds:6,currentRound:i});
+    s.push({name:'ERHOLUNG',type:'rest',duration:30,block:'BLOCK 1 – SPRINT',blockDetail:'6 Runden · 30 Sek. Sprint / 30 Sek. Erholung\n'+(i<6?'Locker ausrollen, Atem holen':'Letzte Runde! Locker ausrollen'),intensity:40,totalRounds:6,currentRound:i});
+  }
+  s.push({name:'AKTIVE PAUSE',type:'pause',duration:120,block:'ÜBERGANG',blockDetail:'Ruhiges Treten, Atem normalisieren\nBereitmachen für Block 2',intensity:55,totalRounds:0,currentRound:0});
+  for(let i=1;i<=4;i++){
+    s.push({name:'INTERVALL',type:'sprint',duration:40,block:'BLOCK 2 – INTERVALL',blockDetail:'4 Runden · 40 Sek. Intervall / 20 Sek. Erholung\nMittleres-hohes Tempo, mittlerer Widerstand',intensity:80,totalRounds:4,currentRound:i});
+    s.push({name:'ERHOLUNG',type:'rest',duration:20,block:'BLOCK 2 – INTERVALL',blockDetail:'4 Runden · 40 Sek. Intervall / 20 Sek. Erholung\n'+(i<4?'Kurz ausfahren':'Letzte Runde! Dann Ausfahren'),intensity:45,totalRounds:4,currentRound:i});
+  }
+  s.push({name:'AUSFAHREN',type:'cool',duration:180,block:'COOLDOWN',blockDetail:'Sehr lockeres Treten, Puls senken\nGut gemacht! 🎉',intensity:40,totalRounds:0,currentRound:0});
+  return s;
+}
+
+const WORKOUTS = { advanced: buildAdvanced(), medium: buildMedium() };
 const CIRC=2*Math.PI*140;
 const CLR={sprint:'#ff3c3c',rest:'#3caaff',warm:'#3cffa0',pause:'#aa88ff',cool:'#3cffa0'};
 
+let WORKOUT=[], TOTAL=0;
 let step=0,left=0,elapsed=0,tmr=null,running=false;
 
 function pad(n){return String(n).padStart(2,'0');}
@@ -444,30 +501,37 @@ function tick(){
   if(left>0){left--;elapsed++;ui();}
   else{
     step++;
-    if(step>=WORKOUT.length){clearInterval(tmr);document.getElementById('finish-screen').style.display='flex';return;}
+    if(step>=WORKOUT.length){clearInterval(tmr);running=false;document.getElementById('finish-screen').style.display='flex';return;}
     left=WORKOUT[step].duration;ui();
   }
 }
 
-function startWorkout(){
+function startWorkout(level){
   const ss=document.getElementById('start-screen');
   ss.style.opacity='0';setTimeout(()=>ss.style.display='none',500);
+  WORKOUT=WORKOUTS[level];
+  TOTAL=WORKOUT.reduce((a,x)=>a+x.duration,0);
   step=0;elapsed=0;left=WORKOUT[0].duration;ui();
   if(tmr)clearInterval(tmr);tmr=setInterval(tick,1000);running=true;
 }
 
-function restartWorkout(){
+function showStartScreen(){
+  if(tmr)clearInterval(tmr);running=false;
   document.getElementById('finish-screen').style.display='none';
-  step=0;elapsed=0;left=WORKOUT[0].duration;ui();
-  if(tmr)clearInterval(tmr);tmr=setInterval(tick,1000);running=true;
+  const ss=document.getElementById('start-screen');
+  ss.style.display='flex';ss.style.opacity='1';
 }
 
-window.onload=()=>{left=WORKOUT[0].duration;ui();};
+window.onload=()=>{
+  WORKOUT=WORKOUTS.advanced;
+  TOTAL=WORKOUT.reduce((a,x)=>a+x.duration,0);
+  left=WORKOUT[0].duration;ui();
+};
 
 document.addEventListener('keydown',e=>{
   if(e.code==='Space'){
     if(running){clearInterval(tmr);running=false;}
-    else{tmr=setInterval(tick,1000);running=true;}
+    else if(WORKOUT.length){tmr=setInterval(tick,1000);running=true;}
   }
 });
 </script>
