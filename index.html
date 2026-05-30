@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HIIT Velo – 20 Min</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --accent: #e8ff3c;
+    --red: #ff3c3c;
+    --blue: #3caaff;
+    --muted: #3a3a4a;
+    --text: #f0f0f0;
+    --dim: #6a6a7a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* Animated background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(232,255,60,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,255,60,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  #app {
+    position: relative;
+    z-index: 1;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* TOP BAR */
+  #topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 48px;
+    border-bottom: 1px solid var(--muted);
+  }
+
+  #logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 4px;
+    color: var(--accent);
+  }
+
+  #total-progress-wrap {
+    flex: 1;
+    margin: 0 60px;
+  }
+
+  #total-label {
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    color: var(--dim);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  #total-bar {
+    height: 4px;
+    background: var(--muted);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  #total-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 1s linear;
+    width: 0%;
+  }
+
+  #total-time {
+    font-size: 0.75rem;
+    color: var(--dim);
+    margin-top: 6px;
+    text-align: right;
+  }
+
+  /* MAIN CONTENT */
+  #main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 0;
+  }
+
+  /* LEFT - Big timer */
+  #left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 60px;
+    border-right: 1px solid var(--muted);
+    position: relative;
+  }
+
+  #phase-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 8px;
+    color: var(--dim);
+    margin-bottom: 12px;
+    transition: color 0.3s;
+    text-transform: uppercase;
+  }
+
+  #phase-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 5.5rem;
+    line-height: 1;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-align: center;
+    transition: color 0.3s, transform 0.3s;
+    margin-bottom: 40px;
+  }
+
+  #timer-ring {
+    position: relative;
+    width: 320px;
+    height: 320px;
+    margin-bottom: 40px;
+  }
+
+  #timer-ring svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+
+  #ring-bg {
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 8;
+  }
+
+  #ring-fill {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 879.6;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1s linear, stroke 0.3s;
+  }
+
+  #timer-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #countdown {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 7rem;
+    line-height: 1;
+    color: var(--text);
+    transition: color 0.3s;
+  }
+
+  #timer-sub {
+    font-size: 0.7rem;
+    letter-spacing: 4px;
+    color: var(--dim);
+    text-transform: uppercase;
+  }
+
+  #intensity-bar-wrap {
+    width: 320px;
+  }
+
+  #intensity-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    color: var(--dim);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  #intensity-bar {
+    height: 8px;
+    background: var(--muted);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  #intensity-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease, background 0.3s;
+  }
+
+  /* RIGHT - Rounds + next */
+  #right {
+    display: flex;
+    flex-direction: column;
+    padding: 32px 36px;
+    gap: 32px;
+    overflow: hidden;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--muted);
+    border-radius: 8px;
+    padding: 24px;
+  }
+
+  .panel-title {
+    font-size: 0.6rem;
+    letter-spacing: 4px;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  /* Round dots */
+  #rounds-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .round-dot {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: var(--dim);
+    transition: all 0.3s;
+  }
+
+  .round-dot.done {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+    font-weight: 600;
+  }
+
+  .round-dot.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 12px rgba(232,255,60,0.4);
+    animation: pulse-dot 1s ease-in-out infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+
+  /* Block info */
+  #block-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 3px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  #block-detail {
+    font-size: 0.75rem;
+    color: var(--dim);
+    line-height: 1.6;
+  }
+
+  /* Next phase */
+  #next-phase {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 3px;
+    color: var(--dim);
+  }
+
+  #next-duration {
+    font-size: 0.75rem;
+    color: var(--dim);
+    margin-top: 4px;
+  }
+
+  /* START screen */
+  #start-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    transition: opacity 0.5s;
+  }
+
+  #start-screen h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 6rem;
+    letter-spacing: 12px;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  #start-screen p {
+    font-size: 0.9rem;
+    color: var(--dim);
+    letter-spacing: 2px;
+    text-align: center;
+    line-height: 2;
+  }
+
+  #start-btn {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 6px;
+    padding: 18px 60px;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  #start-btn:hover {
+    transform: scale(1.04);
+    box-shadow: 0 0 30px rgba(232,255,60,0.4);
+  }
+
+  /* Finish screen */
+  #finish-screen {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 100;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+  }
+
+  #finish-screen h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 8rem;
+    letter-spacing: 8px;
+    color: var(--accent);
+    animation: glow 2s ease-in-out infinite;
+  }
+
+  @keyframes glow {
+    0%, 100% { text-shadow: 0 0 20px rgba(232,255,60,0.4); }
+    50% { text-shadow: 0 0 60px rgba(232,255,60,0.9); }
+  }
+
+  #finish-screen p {
+    font-size: 1rem;
+    color: var(--dim);
+    letter-spacing: 4px;
+  }
+
+  #restart-btn {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 4px;
+    padding: 14px 48px;
+    background: transparent;
+    color: var(--accent);
+    border: 2px solid var(--accent);
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 16px;
+  }
+
+  /* Flash animation */
+  @keyframes flash {
+    0% { opacity: 1; }
+    50% { opacity: 0.2; }
+    100% { opacity: 1; }
+  }
+
+  .flash { animation: flash 0.3s ease; }
+
+  /* Colors per phase */
+  .phase-sprint { --phase-color: var(--red); }
+  .phase-rest   { --phase-color: var(--blue); }
+  .phase-warm   { --phase-color: #3cffa0; }
+  .phase-pause  { --phase-color: #aa88ff; }
+  .phase-cool   { --phase-color: #3cffa0; }
+</style>
+</head>
+<body>
+
+<!-- START SCREEN -->
+<div id="start-screen">
+  <h1>HIIT VELO</h1>
+  <p>FORTGESCHRITTEN &nbsp;·&nbsp; 20 MINUTEN<br>2 BLÖCKE &nbsp;·&nbsp; TABATA + INTERVALL</p>
+  <button id="start-btn" onclick="startWorkout()">START</button>
+</div>
+
+<!-- FINISH SCREEN -->
+<div id="finish-screen">
+  <h1>DONE</h1>
+  <p>20 MINUTEN ABGESCHLOSSEN – STARK!</p>
+  <button id="restart-btn" onclick="restartWorkout()">NOCHMAL</button>
+</div>
+
+<div id="app">
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <div id="logo">🚴 HIIT VELO</div>
+    <div id="total-progress-wrap">
+      <div id="total-label">Gesamtfortschritt</div>
+      <div id="total-bar"><div id="total-fill"></div></div>
+      <div id="total-time">0:00 / 20:00</div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+    <!-- LEFT -->
+    <div id="left">
+      <div id="phase-label">Phase</div>
+      <div id="phase-name">Aufwärmen</div>
+
+      <div id="timer-ring">
+        <svg viewBox="0 0 300 300">
+          <circle id="ring-bg" cx="150" cy="150" r="140"/>
+          <circle id="ring-fill" cx="150" cy="150" r="140"/>
+        </svg>
+        <div id="timer-center">
+          <div id="countdown">3:00</div>
+          <div id="timer-sub">Sekunden</div>
+        </div>
+      </div>
+
+      <div id="intensity-bar-wrap">
+        <div id="intensity-label">
+          <span>Intensität</span>
+          <span id="intensity-pct">50%</span>
+        </div>
+        <div id="intensity-bar">
+          <div id="intensity-fill" style="width:50%; background:var(--blue)"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div id="right">
+      <!-- Current block info -->
+      <div class="panel">
+        <div class="panel-title">Aktueller Block</div>
+        <div id="block-name">BLOCK 1 – TABATA</div>
+        <div id="block-detail">8 Runden &nbsp;·&nbsp; 20 Sek. Sprint / 10 Sek. Erholung<br>Maximales Tempo, voller Widerstand</div>
+      </div>
+
+      <!-- Rounds -->
+      <div class="panel">
+        <div class="panel-title">Runden</div>
+        <div id="rounds-grid"></div>
+      </div>
+
+      <!-- Next phase -->
+      <div class="panel">
+        <div class="panel-title">Nächste Phase</div>
+        <div id="next-phase">–</div>
+        <div id="next-duration"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── WORKOUT DEFINITION ───────────────────────────────────────────────
+// Each step: { name, type (sprint/rest/warm/pause/cool), duration (sec), block, intensity (0-100), totalRounds, currentRound }
+
+function buildWorkout() {
+  const steps = [];
+
+  // 1. Aufwärmen 3 min
+  steps.push({ name: 'AUFWÄRMEN', type: 'warm', duration: 180, block: 'VORBEREITUNG', blockDetail: 'Lockeres Treten, Muskeln aktivieren', intensity: 50, totalRounds: 0, currentRound: 0 });
+
+  // 2. Tabata: 8 rounds × (20s sprint + 10s rest)
+  for (let i = 1; i <= 8; i++) {
+    steps.push({ name: 'SPRINT', type: 'sprint', duration: 20, block: 'BLOCK 1 – TABATA', blockDetail: '8 Runden · 20 Sek. Sprint / 10 Sek. Erholung\nMaximales Tempo, voller Widerstand', intensity: 100, totalRounds: 8, currentRound: i });
+    if (i < 8) {
+      steps.push({ name: 'ERHOLUNG', type: 'rest', duration: 10, block: 'BLOCK 1 – TABATA', blockDetail: '8 Runden · 20 Sek. Sprint / 10 Sek. Erholung\nKurz ausrollen, Atem holen', intensity: 40, totalRounds: 8, currentRound: i });
+    } else {
+      // Last rest after round 8 leads to active pause
+      steps.push({ name: 'ERHOLUNG', type: 'rest', duration: 10, block: 'BLOCK 1 – TABATA', blockDetail: '8 Runden · 20 Sek. Sprint / 10 Sek. Erholung\nLetzte Runde! Kurz ausrollen', intensity: 40, totalRounds: 8, currentRound: i });
+    }
+  }
+
+  // 3. Aktive Pause 2 min
+  steps.push({ name: 'AKTIVE PAUSE', type: 'pause', duration: 120, block: 'ÜBERGANG', blockDetail: 'Mittleres Tempo, tief atmen\nBereitmachen für Block 2', intensity: 60, totalRounds: 0, currentRound: 0 });
+
+  // 4. Block 2: 5 rounds × (40s sprint + 20s rest) – last rest omitted, straight to cooldown
+  for (let i = 1; i <= 5; i++) {
+    steps.push({ name: 'INTERVALL', type: 'sprint', duration: 40, block: 'BLOCK 2 – INTERVALL', blockDetail: '5 Runden · 40 Sek. Intervall / 20 Sek. Erholung\nHohes Tempo, mittlerer Widerstand', intensity: 90, totalRounds: 5, currentRound: i });
+    if (i < 5) {
+      steps.push({ name: 'ERHOLUNG', type: 'rest', duration: 20, block: 'BLOCK 2 – INTERVALL', blockDetail: '5 Runden · 40 Sek. Intervall / 20 Sek. Erholung\nAusfahren, Atmung kontrollieren', intensity: 50, totalRounds: 5, currentRound: i });
+    } else {
+      steps.push({ name: 'ERHOLUNG', type: 'rest', duration: 20, block: 'BLOCK 2 – INTERVALL', blockDetail: '5 Runden · 40 Sek. Intervall / 20 Sek. Erholung\nLetzte Runde! Dann Ausfahren', intensity: 50, totalRounds: 5, currentRound: i });
+    }
+  }
+
+  // 5. Ausfahren 3 min
+  steps.push({ name: 'AUSFAHREN', type: 'cool', duration: 180, block: 'COOLDOWN', blockDetail: 'Sehr lockeres Treten, Puls senken\nDu hast es geschafft! 🎉', intensity: 40, totalRounds: 0, currentRound: 0 });
+
+  return steps;
+}
+
+const WORKOUT = buildWorkout();
+const TOTAL_DURATION = WORKOUT.reduce((s, x) => s + x.duration, 0); // should be ~1200s = 20min
+
+let currentStep = 0;
+let timeLeft = 0;
+let totalElapsed = 0;
+let timer = null;
+let isRunning = false;
+
+const CIRCUMFERENCE = 2 * Math.PI * 140; // 879.6
+
+const phaseColors = {
+  sprint: '#ff3c3c',
+  rest:   '#3caaff',
+  warm:   '#3cffa0',
+  pause:  '#aa88ff',
+  cool:   '#3cffa0',
+};
+
+function pad(n) { return String(n).padStart(2, '0'); }
+function fmtTime(s) { return `${Math.floor(s/60)}:${pad(s%60)}`; }
+
+function buildRoundDots(totalRounds, current) {
+  const grid = document.getElementById('rounds-grid');
+  grid.innerHTML = '';
+  if (totalRounds === 0) {
+    grid.innerHTML = '<span style="font-size:0.75rem;color:var(--dim);">—</span>';
+    return;
+  }
+  for (let i = 1; i <= totalRounds; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'round-dot' + (i < current ? ' done' : i === current ? ' active' : '');
+    dot.textContent = i;
+    grid.appendChild(dot);
+  }
+}
+
+function updateUI() {
+  const step = WORKOUT[currentStep];
+  const color = phaseColors[step.type];
+
+  // Phase name + color
+  document.getElementById('phase-name').textContent = step.name;
+  document.getElementById('phase-name').style.color = color;
+  document.getElementById('ring-fill').style.stroke = color;
+
+  // Timer ring
+  const progress = timeLeft / step.duration;
+  const offset = CIRCUMFERENCE * (1 - progress);
+  document.getElementById('ring-fill').style.strokeDashoffset = offset;
+
+  // Countdown
+  document.getElementById('countdown').textContent = fmtTime(timeLeft);
+  document.getElementById('countdown').style.color = (timeLeft <= 5 && step.type === 'sprint') ? '#ff3c3c' : 'var(--text)';
+
+  // Intensity
+  document.getElementById('intensity-pct').textContent = step.intensity + '%';
+  const fill = document.getElementById('intensity-fill');
+  fill.style.width = step.intensity + '%';
+  fill.style.background = color;
+
+  // Block info
+  document.getElementById('block-name').textContent = step.block;
+  document.getElementById('block-detail').textContent = step.blockDetail;
+
+  // Round dots
+  buildRoundDots(step.totalRounds, step.currentRound);
+
+  // Next phase
+  const next = WORKOUT[currentStep + 1];
+  if (next) {
+    document.getElementById('next-phase').textContent = next.name;
+    document.getElementById('next-phase').style.color = phaseColors[next.type];
+    document.getElementById('next-duration').textContent = next.duration + ' Sekunden';
+  } else {
+    document.getElementById('next-phase').textContent = 'FERTIG!';
+    document.getElementById('next-duration').textContent = '';
+  }
+
+  // Total progress
+  const pct = (totalElapsed / TOTAL_DURATION) * 100;
+  document.getElementById('total-fill').style.width = pct + '%';
+  document.getElementById('total-time').textContent = fmtTime(totalElapsed) + ' / 20:00';
+}
+
+function tick() {
+  if (timeLeft > 0) {
+    timeLeft--;
+    totalElapsed++;
+    updateUI();
+  } else {
+    // Next step
+    currentStep++;
+    if (currentStep >= WORKOUT.length) {
+      // Finished
+      clearInterval(timer);
+      document.getElementById('finish-screen').style.display = 'flex';
+      return;
+    }
+    timeLeft = WORKOUT[currentStep].duration;
+    updateUI();
+  }
+}
+
+function startWorkout() {
+  const ss = document.getElementById('start-screen');
+  ss.style.opacity = '0';
+  setTimeout(() => ss.style.display = 'none', 500);
+
+  currentStep = 0;
+  totalElapsed = 0;
+  timeLeft = WORKOUT[0].duration;
+  updateUI();
+
+  if (timer) clearInterval(timer);
+  timer = setInterval(tick, 1000);
+}
+
+function restartWorkout() {
+  document.getElementById('finish-screen').style.display = 'none';
+  currentStep = 0;
+  totalElapsed = 0;
+  timeLeft = WORKOUT[0].duration;
+  updateUI();
+  if (timer) clearInterval(timer);
+  timer = setInterval(tick, 1000);
+}
+
+// Init display
+window.onload = () => {
+  timeLeft = WORKOUT[0].duration;
+  updateUI();
+};
+
+// Keyboard: Space to pause/resume
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space') {
+    if (isRunning) {
+      clearInterval(timer);
+      isRunning = false;
+    } else {
+      timer = setInterval(tick, 1000);
+      isRunning = true;
+    }
+  }
+});
+</script>
+</body>
+</html>
