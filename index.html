@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>HIIT Velo – 20 Min</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -16,137 +16,148 @@
     --text: #f0f0f0;
     --dim: #6a6a7a;
   }
- /* Next phase */
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
+  html, body {
+    width: 100%;
+    height: 100%;
     overflow: hidden;
-    user-select: none;
+    background: #0a0a0f;
   }
 
-  /* Animated background grid */
-  body::before {
-    content: '';
+  /* Fixed 1920×1080 canvas that scales to fill any screen */
+  #scale-root {
     position: fixed;
+    top: 0; left: 0;
+    width: 1920px;
+    height: 1080px;
+    transform-origin: top left;
+    background: var(--bg);
+    font-family: 'DM Mono', monospace;
+    color: var(--text);
+    overflow: hidden;
+  }
+
+  /* Background grid */
+  #scale-root::before {
+    content: '';
+    position: absolute;
     inset: 0;
     background-image:
       linear-gradient(rgba(232,255,60,0.03) 1px, transparent 1px),
       linear-gradient(90deg, rgba(232,255,60,0.03) 1px, transparent 1px);
     background-size: 60px 60px;
-    z-index: 0;
     pointer-events: none;
+    z-index: 0;
   }
 
   #app {
     position: relative;
     z-index: 1;
-    height: 100vh;
+    width: 1920px;
+    height: 1080px;
     display: flex;
     flex-direction: column;
   }
 
-  /* TOP BAR */
+  /* ── TOP BAR ── */
   #topbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 48px;
+    padding: 28px 80px;
     border-bottom: 1px solid var(--muted);
+    flex-shrink: 0;
+    height: 100px;
   }
 
   #logo {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 2rem;
-    letter-spacing: 4px;
+    font-size: 2.4rem;
+    letter-spacing: 6px;
     color: var(--accent);
+    white-space: nowrap;
   }
 
   #total-progress-wrap {
     flex: 1;
-    margin: 0 60px;
+    margin: 0 80px;
   }
 
   #total-label {
-    font-size: 0.65rem;
-    letter-spacing: 3px;
+    font-size: 0.7rem;
+    letter-spacing: 4px;
     color: var(--dim);
-    margin-bottom: 6px;
+    margin-bottom: 8px;
     text-transform: uppercase;
   }
 
   #total-bar {
-    height: 4px;
+    height: 6px;
     background: var(--muted);
-    border-radius: 2px;
+    border-radius: 3px;
     overflow: hidden;
   }
 
   #total-fill {
     height: 100%;
     background: var(--accent);
-    border-radius: 2px;
+    border-radius: 3px;
     transition: width 1s linear;
     width: 0%;
   }
 
   #total-time {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: var(--dim);
-    margin-top: 6px;
+    margin-top: 8px;
     text-align: right;
   }
 
-  /* MAIN CONTENT */
+  /* ── MAIN ── */
   #main {
     flex: 1;
     display: grid;
-    grid-template-columns: 1fr 380px;
-    gap: 0;
+    grid-template-columns: 1fr 560px;
+    overflow: hidden;
   }
 
-  /* LEFT - Big timer */
+  /* ── LEFT ── */
   #left {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 40px 60px;
+    padding: 40px 80px;
     border-right: 1px solid var(--muted);
-    position: relative;
   }
 
   #phase-label {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.4rem;
-    letter-spacing: 8px;
+    font-size: 1.6rem;
+    letter-spacing: 10px;
     color: var(--dim);
-    margin-bottom: 12px;
-    transition: color 0.3s;
+    margin-bottom: 10px;
     text-transform: uppercase;
   }
 
   #phase-name {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 5.5rem;
+    font-size: 7rem;
     line-height: 1;
-    letter-spacing: 4px;
+    letter-spacing: 6px;
     color: var(--accent);
     text-align: center;
-    transition: color 0.3s, transform 0.3s;
-    margin-bottom: 40px;
+    transition: color 0.3s;
+    margin-bottom: 50px;
   }
 
   #timer-ring {
     position: relative;
-    width: 320px;
-    height: 320px;
-    margin-bottom: 40px;
+    width: 380px;
+    height: 380px;
+    margin-bottom: 50px;
   }
 
   #timer-ring svg {
@@ -158,13 +169,13 @@
   #ring-bg {
     fill: none;
     stroke: var(--muted);
-    stroke-width: 8;
+    stroke-width: 10;
   }
 
   #ring-fill {
     fill: none;
     stroke: var(--accent);
-    stroke-width: 8;
+    stroke-width: 10;
     stroke-linecap: round;
     stroke-dasharray: 879.6;
     stroke-dashoffset: 0;
@@ -182,86 +193,102 @@
 
   #countdown {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 7rem;
+    font-size: 8rem;
     line-height: 1;
     color: var(--text);
     transition: color 0.3s;
   }
 
   #timer-sub {
-    font-size: 0.7rem;
-    letter-spacing: 4px;
+    font-size: 0.75rem;
+    letter-spacing: 5px;
     color: var(--dim);
     text-transform: uppercase;
+    margin-top: 6px;
   }
 
   #intensity-bar-wrap {
-    width: 320px;
+    width: 380px;
   }
 
   #intensity-label {
     display: flex;
     justify-content: space-between;
-    font-size: 0.65rem;
-    letter-spacing: 2px;
+    font-size: 0.75rem;
+    letter-spacing: 3px;
     color: var(--dim);
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     text-transform: uppercase;
   }
 
   #intensity-bar {
-    height: 8px;
+    height: 10px;
     background: var(--muted);
-    border-radius: 4px;
+    border-radius: 5px;
     overflow: hidden;
   }
 
   #intensity-fill {
     height: 100%;
-    border-radius: 4px;
+    border-radius: 5px;
     transition: width 0.5s ease, background 0.3s;
   }
 
-  /* RIGHT - Rounds + next */
+  /* ── RIGHT ── */
   #right {
     display: flex;
     flex-direction: column;
-    padding: 32px 36px;
-    gap: 32px;
+    padding: 40px 48px;
+    gap: 28px;
     overflow: hidden;
   }
 
   .panel {
     background: var(--surface);
     border: 1px solid var(--muted);
-    border-radius: 8px;
-    padding: 24px;
+    border-radius: 10px;
+    padding: 28px 32px;
   }
 
   .panel-title {
-    font-size: 0.6rem;
-    letter-spacing: 4px;
+    font-size: 0.65rem;
+    letter-spacing: 5px;
     color: var(--dim);
     text-transform: uppercase;
     margin-bottom: 16px;
+  }
+
+  #block-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.4rem;
+    letter-spacing: 3px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  #block-detail {
+    font-size: 0.85rem;
+    color: var(--dim);
+    line-height: 1.7;
+    white-space: pre-line;
   }
 
   /* Round dots */
   #rounds-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
   }
 
   .round-dot {
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     border: 2px solid var(--muted);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     color: var(--dim);
     transition: all 0.3s;
   }
@@ -270,53 +297,38 @@
     background: var(--accent);
     border-color: var(--accent);
     color: var(--bg);
-    font-weight: 600;
+    font-weight: 700;
   }
 
   .round-dot.active {
     border-color: var(--accent);
     color: var(--accent);
-    box-shadow: 0 0 12px rgba(232,255,60,0.4);
+    box-shadow: 0 0 16px rgba(232,255,60,0.5);
     animation: pulse-dot 1s ease-in-out infinite;
   }
 
   @keyframes pulse-dot {
     0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.15); }
+    50% { transform: scale(1.18); }
   }
 
-  /* Block info */
-  #block-name {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2rem;
-    letter-spacing: 3px;
-    color: var(--text);
-    margin-bottom: 4px;
-  }
-
-  #block-detail {
-    font-size: 0.75rem;
-    color: var(--dim);
-    line-height: 1.6;
-  }
-
-  /* Next phase */
   #next-phase {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.6rem;
-    letter-spacing: 3px;
+    font-size: 2rem;
+    letter-spacing: 4px;
     color: var(--dim);
   }
 
   #next-duration {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: var(--dim);
-    margin-top: 4px;
+    margin-top: 6px;
+    letter-spacing: 2px;
   }
 
-  /* START screen */
+  /* ── START SCREEN ── */
   #start-screen {
-    position: fixed;
+    position: absolute;
     inset: 0;
     background: var(--bg);
     z-index: 100;
@@ -324,371 +336,288 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 32px;
+    gap: 40px;
     transition: opacity 0.5s;
   }
 
   #start-screen h1 {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 6rem;
-    letter-spacing: 12px;
+    font-size: 9rem;
+    letter-spacing: 16px;
     color: var(--accent);
     line-height: 1;
   }
 
   #start-screen p {
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     color: var(--dim);
-    letter-spacing: 2px;
+    letter-spacing: 3px;
     text-align: center;
-    line-height: 2;
+    line-height: 2.2;
   }
 
   #start-btn {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.6rem;
-    letter-spacing: 6px;
-    padding: 18px 60px;
+    font-size: 2rem;
+    letter-spacing: 8px;
+    padding: 24px 80px;
     background: var(--accent);
     color: var(--bg);
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
   }
 
   #start-btn:hover {
     transform: scale(1.04);
-    box-shadow: 0 0 30px rgba(232,255,60,0.4);
+    box-shadow: 0 0 40px rgba(232,255,60,0.5);
   }
 
-  /* Finish screen */
+  /* ── FINISH SCREEN ── */
   #finish-screen {
     display: none;
-    position: fixed;
+    position: absolute;
     inset: 0;
     background: var(--bg);
     z-index: 100;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 24px;
+    gap: 32px;
   }
 
   #finish-screen h1 {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 8rem;
-    letter-spacing: 8px;
+    font-size: 12rem;
+    letter-spacing: 10px;
     color: var(--accent);
     animation: glow 2s ease-in-out infinite;
   }
 
   @keyframes glow {
-    0%, 100% { text-shadow: 0 0 20px rgba(232,255,60,0.4); }
-    50% { text-shadow: 0 0 60px rgba(232,255,60,0.9); }
+    0%, 100% { text-shadow: 0 0 30px rgba(232,255,60,0.4); }
+    50% { text-shadow: 0 0 80px rgba(232,255,60,0.95); }
   }
 
   #finish-screen p {
-    font-size: 1rem;
+    font-size: 1.2rem;
     color: var(--dim);
-    letter-spacing: 4px;
+    letter-spacing: 5px;
   }
 
   #restart-btn {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.2rem;
-    letter-spacing: 4px;
-    padding: 14px 48px;
+    font-size: 1.5rem;
+    letter-spacing: 5px;
+    padding: 20px 60px;
     background: transparent;
     color: var(--accent);
     border: 2px solid var(--accent);
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
-    margin-top: 16px;
+    margin-top: 20px;
   }
-
-  /* Flash animation */
-  @keyframes flash {
-    0% { opacity: 1; }
-    50% { opacity: 0.2; }
-    100% { opacity: 1; }
-  }
-
-  .flash { animation: flash 0.3s ease; }
-
-  /* Colors per phase */
-  .phase-sprint { --phase-color: var(--red); }
-  .phase-rest   { --phase-color: var(--blue); }
-  .phase-warm   { --phase-color: #3cffa0; }
-  .phase-pause  { --phase-color: #aa88ff; }
-  .phase-cool   { --phase-color: #3cffa0; }
 </style>
 </head>
 <body>
 
-<!-- START SCREEN -->
-<div id="start-screen">
-  <h1>HIIT VELO</h1>
-  <p>FORTGESCHRITTEN &nbsp;·&nbsp; 20 MINUTEN<br>2 BLÖCKE &nbsp;·&nbsp; TABATA + INTERVALL</p>
-  <button id="start-btn" onclick="startWorkout()">START</button>
-</div>
-
-<!-- FINISH SCREEN -->
-<div id="finish-screen">
-  <h1>DONE</h1>
-  <p>20 MINUTEN ABGESCHLOSSEN – STARK!</p>
-  <button id="restart-btn" onclick="restartWorkout()">NOCHMAL</button>
-</div>
-
-<div id="app">
-  <!-- TOP BAR -->
-  <div id="topbar">
-    <div id="logo">🚴 HIIT VELO</div>
-    <div id="total-progress-wrap">
-      <div id="total-label">Gesamtfortschritt</div>
-      <div id="total-bar"><div id="total-fill"></div></div>
-      <div id="total-time">0:00 / 20:00</div>
-    </div>
+<div id="scale-root">
+  <!-- START SCREEN -->
+  <div id="start-screen">
+    <h1>HIIT VELO</h1>
+    <p>FORTGESCHRITTEN &nbsp;·&nbsp; 20 MINUTEN<br>2 BLÖCKE &nbsp;·&nbsp; TABATA + INTERVALL</p>
+    <button id="start-btn" onclick="startWorkout()">START</button>
   </div>
 
-  <!-- MAIN -->
-  <div id="main">
-    <!-- LEFT -->
-    <div id="left">
-      <div id="phase-label">Phase</div>
-      <div id="phase-name">Aufwärmen</div>
+  <!-- FINISH SCREEN -->
+  <div id="finish-screen">
+    <h1>DONE</h1>
+    <p>20 MINUTEN ABGESCHLOSSEN – STARK!</p>
+    <button id="restart-btn" onclick="restartWorkout()">NOCHMAL</button>
+  </div>
 
-      <div id="timer-ring">
-        <svg viewBox="0 0 300 300">
-          <circle id="ring-bg" cx="150" cy="150" r="140"/>
-          <circle id="ring-fill" cx="150" cy="150" r="140"/>
-        </svg>
-        <div id="timer-center">
-          <div id="countdown">3:00</div>
-          <div id="timer-sub">Sekunden</div>
-        </div>
-      </div>
-
-      <div id="intensity-bar-wrap">
-        <div id="intensity-label">
-          <span>Intensität</span>
-          <span id="intensity-pct">50%</span>
-        </div>
-        <div id="intensity-bar">
-          <div id="intensity-fill" style="width:50%; background:var(--blue)"></div>
-        </div>
+  <div id="app">
+    <!-- TOP BAR -->
+    <div id="topbar">
+      <div id="logo">🚴 HIIT VELO</div>
+      <div id="total-progress-wrap">
+        <div id="total-label">Gesamtfortschritt</div>
+        <div id="total-bar"><div id="total-fill"></div></div>
+        <div id="total-time">0:00 / 20:00</div>
       </div>
     </div>
 
-    <!-- RIGHT -->
-    <div id="right">
-      <!-- Current block info -->
-      <div class="panel">
-        <div class="panel-title">Aktueller Block</div>
-        <div id="block-name">BLOCK 1 – TABATA</div>
-        <div id="block-detail">8 Runden &nbsp;·&nbsp; 20 Sek. Sprint / 10 Sek. Erholung<br>Maximales Tempo, voller Widerstand</div>
+    <!-- MAIN -->
+    <div id="main">
+      <!-- LEFT -->
+      <div id="left">
+        <div id="phase-label">Phase</div>
+        <div id="phase-name">Aufwärmen</div>
+        <div id="timer-ring">
+          <svg viewBox="0 0 300 300">
+            <circle id="ring-bg" cx="150" cy="150" r="140"/>
+            <circle id="ring-fill" cx="150" cy="150" r="140"/>
+          </svg>
+          <div id="timer-center">
+            <div id="countdown">3:00</div>
+            <div id="timer-sub">Sekunden</div>
+          </div>
+        </div>
+        <div id="intensity-bar-wrap">
+          <div id="intensity-label">
+            <span>Intensität</span>
+            <span id="intensity-pct">50%</span>
+          </div>
+          <div id="intensity-bar">
+            <div id="intensity-fill" style="width:50%;background:var(--blue)"></div>
+          </div>
+        </div>
       </div>
 
-      <!-- Rounds -->
-      <div class="panel">
-        <div class="panel-title">Runden</div>
-        <div id="rounds-grid"></div>
-      </div>
-
-      <!-- Next phase -->
-      <div class="panel">
-        <div class="panel-title">Nächste Phase</div>
-        <div id="next-phase">–</div>
-        <div id="next-duration"></div>
+      <!-- RIGHT -->
+      <div id="right">
+        <div class="panel">
+          <div class="panel-title">Aktueller Block</div>
+          <div id="block-name">BLOCK 1 – TABATA</div>
+          <div id="block-detail">8 Runden · 20 Sek. Sprint / 10 Sek. Erholung
+Maximales Tempo, voller Widerstand</div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Runden</div>
+          <div id="rounds-grid"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Nächste Phase</div>
+          <div id="next-phase">–</div>
+          <div id="next-duration"></div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-// ─── WORKOUT DEFINITION ───────────────────────────────────────────────
-// Each step: { name, type (sprint/rest/warm/pause/cool), duration (sec), block, intensity (0-100), totalRounds, currentRound }
+// ── Scale to fill screen ────────────────────────────────────────────────
+function scaleToFit() {
+  const root = document.getElementById('scale-root');
+  const scaleX = window.innerWidth  / 1920;
+  const scaleY = window.innerHeight / 1080;
+  const scale  = Math.min(scaleX, scaleY);
+  root.style.transform = `scale(${scale})`;
+  // Centre if letterboxed
+  root.style.left = ((window.innerWidth  - 1920 * scale) / 2) + 'px';
+  root.style.top  = ((window.innerHeight - 1080 * scale) / 2) + 'px';
+}
+window.addEventListener('resize', scaleToFit);
+scaleToFit();
 
+// ── Workout definition ─────────────────────────────────────────────────
 function buildWorkout() {
   const steps = [];
-
-  // 1. Aufwärmen 3 min
-  steps.push({ name: 'AUFWÄRMEN', type: 'warm', duration: 180, block: 'VORBEREITUNG', blockDetail: 'Lockeres Treten, Muskeln aktivieren', intensity: 50, totalRounds: 0, currentRound: 0 });
-
-  // 2. Tabata: 8 rounds × (20s sprint + 10s rest)
-  for (let i = 1; i <= 8; i++) {
-    steps.push({ name: 'SPRINT', type: 'sprint', duration: 20, block: 'BLOCK 1 – TABATA', blockDetail: '8 Runden · 20 Sek. Sprint / 10 Sek. Erholung\nMaximales Tempo, voller Widerstand', intensity: 100, totalRounds: 8, currentRound: i });
-    if (i < 8) {
-      steps.push({ name: 'ERHOLUNG', type: 'rest', duration: 10, block: 'BLOCK 1 – TABATA', blockDetail: '8 Runden · 20 Sek. Sprint / 10 Sek. Erholung\nKurz ausrollen, Atem holen', intensity: 40, totalRounds: 8, currentRound: i });
-    } else {
-      // Last rest after round 8 leads to active pause
-      steps.push({ name: 'ERHOLUNG', type: 'rest', duration: 10, block: 'BLOCK 1 – TABATA', blockDetail: '8 Runden · 20 Sek. Sprint / 10 Sek. Erholung\nLetzte Runde! Kurz ausrollen', intensity: 40, totalRounds: 8, currentRound: i });
-    }
+  steps.push({ name:'AUFWÄRMEN', type:'warm', duration:180, block:'VORBEREITUNG', blockDetail:'Lockeres Treten, Muskeln aktivieren', intensity:50, totalRounds:0, currentRound:0 });
+  for (let i=1; i<=8; i++) {
+    steps.push({ name:'SPRINT', type:'sprint', duration:20, block:'BLOCK 1 – TABATA', blockDetail:'8 Runden · 20 Sek. Sprint / 10 Sek. Erholung\nMaximales Tempo, voller Widerstand', intensity:100, totalRounds:8, currentRound:i });
+    steps.push({ name:'ERHOLUNG', type:'rest', duration:10, block:'BLOCK 1 – TABATA', blockDetail:'8 Runden · 20 Sek. Sprint / 10 Sek. Erholung\n' + (i<8?'Kurz ausrollen, Atem holen':'Letzte Runde! Kurz ausrollen'), intensity:40, totalRounds:8, currentRound:i });
   }
-
-  // 3. Aktive Pause 2 min
-  steps.push({ name: 'AKTIVE PAUSE', type: 'pause', duration: 120, block: 'ÜBERGANG', blockDetail: 'Mittleres Tempo, tief atmen\nBereitmachen für Block 2', intensity: 60, totalRounds: 0, currentRound: 0 });
-
-  // 4. Block 2: 5 rounds × (40s sprint + 20s rest) – last rest omitted, straight to cooldown
-  for (let i = 1; i <= 5; i++) {
-    steps.push({ name: 'INTERVALL', type: 'sprint', duration: 40, block: 'BLOCK 2 – INTERVALL', blockDetail: '5 Runden · 40 Sek. Intervall / 20 Sek. Erholung\nHohes Tempo, mittlerer Widerstand', intensity: 90, totalRounds: 5, currentRound: i });
-    if (i < 5) {
-      steps.push({ name: 'ERHOLUNG', type: 'rest', duration: 20, block: 'BLOCK 2 – INTERVALL', blockDetail: '5 Runden · 40 Sek. Intervall / 20 Sek. Erholung\nAusfahren, Atmung kontrollieren', intensity: 50, totalRounds: 5, currentRound: i });
-    } else {
-      steps.push({ name: 'ERHOLUNG', type: 'rest', duration: 20, block: 'BLOCK 2 – INTERVALL', blockDetail: '5 Runden · 40 Sek. Intervall / 20 Sek. Erholung\nLetzte Runde! Dann Ausfahren', intensity: 50, totalRounds: 5, currentRound: i });
-    }
+  steps.push({ name:'AKTIVE PAUSE', type:'pause', duration:120, block:'ÜBERGANG', blockDetail:'Mittleres Tempo, tief atmen\nBereitmachen für Block 2', intensity:60, totalRounds:0, currentRound:0 });
+  for (let i=1; i<=5; i++) {
+    steps.push({ name:'INTERVALL', type:'sprint', duration:40, block:'BLOCK 2 – INTERVALL', blockDetail:'5 Runden · 40 Sek. Intervall / 20 Sek. Erholung\nHohes Tempo, mittlerer Widerstand', intensity:90, totalRounds:5, currentRound:i });
+    steps.push({ name:'ERHOLUNG', type:'rest', duration:20, block:'BLOCK 2 – INTERVALL', blockDetail:'5 Runden · 40 Sek. Intervall / 20 Sek. Erholung\n'+(i<5?'Ausfahren, Atmung kontrollieren':'Letzte Runde! Dann Ausfahren'), intensity:50, totalRounds:5, currentRound:i });
   }
-
-  // 5. Ausfahren 3 min
-  steps.push({ name: 'AUSFAHREN', type: 'cool', duration: 180, block: 'COOLDOWN', blockDetail: 'Sehr lockeres Treten, Puls senken\nDu hast es geschafft! 🎉', intensity: 40, totalRounds: 0, currentRound: 0 });
-
+  steps.push({ name:'AUSFAHREN', type:'cool', duration:180, block:'COOLDOWN', blockDetail:'Sehr lockeres Treten, Puls senken\nDu hast es geschafft! 🎉', intensity:40, totalRounds:0, currentRound:0 });
   return steps;
 }
 
 const WORKOUT = buildWorkout();
-const TOTAL_DURATION = WORKOUT.reduce((s, x) => s + x.duration, 0); // should be ~1200s = 20min
+const TOTAL_DURATION = WORKOUT.reduce((s,x)=>s+x.duration,0);
+const CIRCUMFERENCE = 2*Math.PI*140;
+const phaseColors = { sprint:'#ff3c3c', rest:'#3caaff', warm:'#3cffa0', pause:'#aa88ff', cool:'#3cffa0' };
 
-let currentStep = 0;
-let timeLeft = 0;
-let totalElapsed = 0;
-let timer = null;
-let isRunning = false;
+let currentStep=0, timeLeft=0, totalElapsed=0, timer=null, isRunning=false;
 
-const CIRCUMFERENCE = 2 * Math.PI * 140; // 879.6
+function pad(n){return String(n).padStart(2,'0');}
+function fmtTime(s){return `${Math.floor(s/60)}:${pad(s%60)}`;}
 
-const phaseColors = {
-  sprint: '#ff3c3c',
-  rest:   '#3caaff',
-  warm:   '#3cffa0',
-  pause:  '#aa88ff',
-  cool:   '#3cffa0',
-};
-
-function pad(n) { return String(n).padStart(2, '0'); }
-function fmtTime(s) { return `${Math.floor(s/60)}:${pad(s%60)}`; }
-
-function buildRoundDots(totalRounds, current) {
+function buildRoundDots(total, current) {
   const grid = document.getElementById('rounds-grid');
   grid.innerHTML = '';
-  if (totalRounds === 0) {
-    grid.innerHTML = '<span style="font-size:0.75rem;color:var(--dim);">—</span>';
-    return;
-  }
-  for (let i = 1; i <= totalRounds; i++) {
-    const dot = document.createElement('div');
-    dot.className = 'round-dot' + (i < current ? ' done' : i === current ? ' active' : '');
-    dot.textContent = i;
-    grid.appendChild(dot);
+  if (!total) { grid.innerHTML='<span style="font-size:0.85rem;color:var(--dim);">—</span>'; return; }
+  for (let i=1;i<=total;i++) {
+    const d=document.createElement('div');
+    d.className='round-dot'+(i<current?' done':i===current?' active':'');
+    d.textContent=i;
+    grid.appendChild(d);
   }
 }
 
 function updateUI() {
-  const step = WORKOUT[currentStep];
-  const color = phaseColors[step.type];
-
-  // Phase name + color
-  document.getElementById('phase-name').textContent = step.name;
-  document.getElementById('phase-name').style.color = color;
-  document.getElementById('ring-fill').style.stroke = color;
-
-  // Timer ring
-  const progress = timeLeft / step.duration;
-  const offset = CIRCUMFERENCE * (1 - progress);
-  document.getElementById('ring-fill').style.strokeDashoffset = offset;
-
-  // Countdown
-  document.getElementById('countdown').textContent = fmtTime(timeLeft);
-  document.getElementById('countdown').style.color = (timeLeft <= 5 && step.type === 'sprint') ? '#ff3c3c' : 'var(--text)';
-
-  // Intensity
-  document.getElementById('intensity-pct').textContent = step.intensity + '%';
-  const fill = document.getElementById('intensity-fill');
-  fill.style.width = step.intensity + '%';
-  fill.style.background = color;
-
-  // Block info
-  document.getElementById('block-name').textContent = step.block;
-  document.getElementById('block-detail').textContent = step.blockDetail;
-
-  // Round dots
-  buildRoundDots(step.totalRounds, step.currentRound);
-
-  // Next phase
-  const next = WORKOUT[currentStep + 1];
-  if (next) {
-    document.getElementById('next-phase').textContent = next.name;
-    document.getElementById('next-phase').style.color = phaseColors[next.type];
-    document.getElementById('next-duration').textContent = next.duration + ' Sekunden';
+  const step=WORKOUT[currentStep];
+  const color=phaseColors[step.type];
+  document.getElementById('phase-name').textContent=step.name;
+  document.getElementById('phase-name').style.color=color;
+  document.getElementById('ring-fill').style.stroke=color;
+  const offset=CIRCUMFERENCE*(1-timeLeft/step.duration);
+  document.getElementById('ring-fill').style.strokeDashoffset=offset;
+  document.getElementById('countdown').textContent=fmtTime(timeLeft);
+  document.getElementById('countdown').style.color=(timeLeft<=5&&step.type==='sprint')?'#ff3c3c':'var(--text)';
+  document.getElementById('intensity-pct').textContent=step.intensity+'%';
+  const fill=document.getElementById('intensity-fill');
+  fill.style.width=step.intensity+'%';
+  fill.style.background=color;
+  document.getElementById('block-name').textContent=step.block;
+  document.getElementById('block-detail').textContent=step.blockDetail;
+  buildRoundDots(step.totalRounds,step.currentRound);
+  const next=WORKOUT[currentStep+1];
+  if(next){
+    document.getElementById('next-phase').textContent=next.name;
+    document.getElementById('next-phase').style.color=phaseColors[next.type];
+    document.getElementById('next-duration').textContent=next.duration+' Sekunden';
   } else {
-    document.getElementById('next-phase').textContent = 'FERTIG!';
-    document.getElementById('next-duration').textContent = '';
+    document.getElementById('next-phase').textContent='FERTIG!';
+    document.getElementById('next-duration').textContent='';
   }
-
-  // Total progress
-  const pct = (totalElapsed / TOTAL_DURATION) * 100;
-  document.getElementById('total-fill').style.width = pct + '%';
-  document.getElementById('total-time').textContent = fmtTime(totalElapsed) + ' / 20:00';
+  const pct=(totalElapsed/TOTAL_DURATION)*100;
+  document.getElementById('total-fill').style.width=pct+'%';
+  document.getElementById('total-time').textContent=fmtTime(totalElapsed)+' / 20:00';
 }
 
 function tick() {
-  if (timeLeft > 0) {
-    timeLeft--;
-    totalElapsed++;
-    updateUI();
-  } else {
-    // Next step
+  if(timeLeft>0){ timeLeft--; totalElapsed++; updateUI(); }
+  else {
     currentStep++;
-    if (currentStep >= WORKOUT.length) {
-      // Finished
-      clearInterval(timer);
-      document.getElementById('finish-screen').style.display = 'flex';
-      return;
-    }
-    timeLeft = WORKOUT[currentStep].duration;
+    if(currentStep>=WORKOUT.length){ clearInterval(timer); document.getElementById('finish-screen').style.display='flex'; return; }
+    timeLeft=WORKOUT[currentStep].duration;
     updateUI();
   }
 }
 
 function startWorkout() {
-  const ss = document.getElementById('start-screen');
-  ss.style.opacity = '0';
-  setTimeout(() => ss.style.display = 'none', 500);
-
-  currentStep = 0;
-  totalElapsed = 0;
-  timeLeft = WORKOUT[0].duration;
+  const ss=document.getElementById('start-screen');
+  ss.style.opacity='0';
+  setTimeout(()=>ss.style.display='none',500);
+  currentStep=0; totalElapsed=0; timeLeft=WORKOUT[0].duration;
   updateUI();
-
-  if (timer) clearInterval(timer);
-  timer = setInterval(tick, 1000);
+  if(timer) clearInterval(timer);
+  timer=setInterval(tick,1000);
+  isRunning=true;
 }
 
 function restartWorkout() {
-  document.getElementById('finish-screen').style.display = 'none';
-  currentStep = 0;
-  totalElapsed = 0;
-  timeLeft = WORKOUT[0].duration;
+  document.getElementById('finish-screen').style.display='none';
+  currentStep=0; totalElapsed=0; timeLeft=WORKOUT[0].duration;
   updateUI();
-  if (timer) clearInterval(timer);
-  timer = setInterval(tick, 1000);
+  if(timer) clearInterval(timer);
+  timer=setInterval(tick,1000);
+  isRunning=true;
 }
 
-// Init display
-window.onload = () => {
-  timeLeft = WORKOUT[0].duration;
-  updateUI();
-};
+window.onload=()=>{ timeLeft=WORKOUT[0].duration; updateUI(); };
 
-// Keyboard: Space to pause/resume
-document.addEventListener('keydown', e => {
-  if (e.code === 'Space') {
-    if (isRunning) {
-      clearInterval(timer);
-      isRunning = false;
-    } else {
-      timer = setInterval(tick, 1000);
-      isRunning = true;
-    }
+document.addEventListener('keydown',e=>{
+  if(e.code==='Space'){
+    if(isRunning){ clearInterval(timer); isRunning=false; }
+    else { timer=setInterval(tick,1000); isRunning=true; }
   }
 });
 </script>
